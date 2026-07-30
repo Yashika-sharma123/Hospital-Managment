@@ -11,6 +11,7 @@ export default function TokenStatusCard({ initialToken, onNewBooking }) {
   const [eta, setEta] = useState(initialToken.predictedWaitMinutes);
   const [hoverRating, setHoverRating] = useState(0);
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [standbyAlert, setStandbyAlert] = useState(null);
   const socket = useSocket();
   const { t } = useLanguage();
 
@@ -30,6 +31,7 @@ export default function TokenStatusCard({ initialToken, onNewBooking }) {
     socket.on('token:no-show', refresh);
     socket.on('token:re-queued', refresh);
     socket.on('token:cancelled', refresh);
+    socket.on('token:standby-alert', (data) => setStandbyAlert(data.message));
     const interval = setInterval(refresh, 15000);
 
     return () => {
@@ -38,6 +40,7 @@ export default function TokenStatusCard({ initialToken, onNewBooking }) {
       socket.off('token:no-show', refresh);
       socket.off('token:re-queued', refresh);
       socket.off('token:cancelled', refresh);
+      socket.off('token:standby-alert');
       clearInterval(interval);
     };
   }, [socket, token._id]);
@@ -69,6 +72,15 @@ export default function TokenStatusCard({ initialToken, onNewBooking }) {
         {token.tokenNumber}
       </h1>
       <StatusBadge status={token.status} />
+
+      {isActive && standbyAlert && (
+        <div
+          className="badge badge-warning"
+          style={{ display: 'block', marginTop: 14, padding: '10px 14px', textAlign: 'left', lineHeight: 1.4 }}
+        >
+          ⚡ {standbyAlert}
+        </div>
+      )}
 
       {isActive && (
         <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center', gap: 12 }}>

@@ -4,7 +4,7 @@ const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
 const archiveToken = require('../utils/archiveToken');
-const { getNextTokenForService } = require('../utils/queueSelector');
+const { getUpcomingTokens } = require('../utils/queueSelector');
 const { emitToService, emitToToken, emitToAdmin } = require('../sockets/socket');
 const env = require('../config/env');
 
@@ -20,10 +20,17 @@ const callNext = asyncHandler(async (req, res) => {
     throw new ApiError(403, 'You are not assigned to this counter');
   }
   if (counter.currentToken) {
-    throw new ApiError(400, 'This counter is already serving a token — mark it served/no-show first');
+    const stillActive = await Token.findOne({ _id: counter.currentToken, status: 'called' });
+    if (stillActive) {
+      throw new ApiError(400, 'This counter is already serving a token — mark it served/no-show first');
+    }
+    // stale reference (e.g. the token was removed directly from the DB) — heal it
+    counter.currentToken = null;
+    await counter.save();
   }
 
-  const nextToken = await getNextTokenForService(counter.service._id);
+  const upcoming = await getUpcomingTokens(counter.service._id, 2);
+  const nextToken = upcoming[0];
   if (!nextToken) {
     return new ApiResponse(200, { token: null }, 'Queue is empty').send(res);
   }
@@ -50,6 +57,18 @@ const callNext = asyncHandler(async (req, res) => {
     message: `${token.tokenNumber} called at ${counter.name}`,
     timestamp: now,
   });
+
+  // ---- No-show standby buffer ----
+  // If the token we just called has a high predicted no-show risk, give
+  // the next person in line an early heads-up so they can stay nearby —
+  // this is what turns the no-show PREDICTION into an actual ACTION.
+  const STANDBY_RISK_THRESHOLD = 0.05;
+  const standbyToken = upcoming[1];
+  if (standbyToken && token.noShowProbability > STANDBY_RISK_THRESHOLD) {
+    emitToToken(standbyToken._id, 'token:standby-alert', {
+      message: 'The patient ahead of you may not show up — you could be called sooner than expected. Please stay nearby.',
+    });
+  }
 
   new ApiResponse(200, { token }, `Token ${token.tokenNumber} called`).send(res);
 });

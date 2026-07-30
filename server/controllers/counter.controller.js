@@ -1,9 +1,29 @@
 const Counter = require('../models/Counter.model');
 const Service = require('../models/Service.model');
 const User = require('../models/User.model');
+const Token = require('../models/Token.model');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
+
+// Checks whether a counter's `currentToken` reference is actually still
+// valid (the token exists AND is still in the 'called' state). If the
+// referenced token was deleted directly from the database (e.g. manual
+// cleanup during testing) or somehow got out of sync, this clears the
+// stale reference instead of permanently blocking edit/delete on that
+// counter.
+async function getGenuinelyActiveToken(counter) {
+  if (!counter.currentToken) return null;
+
+  const token = await Token.findOne({ _id: counter.currentToken, status: 'called' });
+  if (!token) {
+    // stale reference — heal it automatically
+    counter.currentToken = null;
+    await counter.save();
+    return null;
+  }
+  return token;
+}
 
 // @route   POST /api/counters
 // @access  Private/Admin
@@ -84,7 +104,8 @@ const updateCounter = asyncHandler(async (req, res) => {
   const counter = await Counter.findById(counterId);
   if (!counter) throw new ApiError(404, 'Counter not found');
 
-  if (counter.currentToken) {
+  const activeToken = await getGenuinelyActiveToken(counter);
+  if (activeToken) {
     throw new ApiError(400, 'Cannot edit a counter while it is actively serving a token — mark it served/no-show first');
   }
 
@@ -107,7 +128,8 @@ const deleteCounter = asyncHandler(async (req, res) => {
   const counter = await Counter.findById(counterId);
   if (!counter) throw new ApiError(404, 'Counter not found');
 
-  if (counter.currentToken) {
+  const activeToken = await getGenuinelyActiveToken(counter);
+  if (activeToken) {
     throw new ApiError(400, 'Cannot delete a counter while it is actively serving a token');
   }
 
