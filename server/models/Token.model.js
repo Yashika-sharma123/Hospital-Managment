@@ -5,7 +5,6 @@ const tokenSchema = new mongoose.Schema(
     tokenNumber: {
       type: String, // e.g. "A-042"
       required: true,
-      unique: true,
     },
     // Determines position in the live queue. Same as createdAt initially,
     // but updated to "now" when a no-show token re-enters — so it goes

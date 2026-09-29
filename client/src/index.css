@@ -7,8 +7,8 @@
   --surface: #ffffff;
   --border: #e4e6f1;
 
-  --ink: #14132b;          /* near-black text with a hint of indigo */
-  --ink-soft: #6b6a85;     /* muted secondary text */
+  --ink: #14132b;
+  --ink-soft: #6b6a85;
 
   --indigo: #4338ca;
   --indigo-deep: #1e1b4b;
@@ -31,7 +31,7 @@
 
   --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
 
-  /* TEMP compatibility aliases for pages not yet redesigned to Aurora */
+  /* TEMP compatibility aliases for any older components still using these names */
   --muted-text: var(--ink-soft);
   --charcoal: var(--ink);
   --green: var(--indigo);
@@ -131,7 +131,6 @@ input:focus, select:focus, textarea:focus {
 }
 .btn-ghost:hover { color: var(--indigo); }
 
-/* ripple */
 .btn::after {
   content: '';
   position: absolute;
@@ -178,7 +177,6 @@ input:focus, select:focus, textarea:focus {
 @keyframes floatSlow { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.02); } }
 @keyframes floatSlower { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 @keyframes pulseGlow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-@keyframes countUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .fade-in { animation: fadeIn 0.6s ease-out both; }
@@ -190,7 +188,6 @@ input:focus, select:focus, textarea:focus {
 .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
 .hover-lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
 
-/* ---- Decorative background blobs (used behind hero sections) ---- */
 .aurora-blob {
   position: absolute;
   border-radius: 50%;
@@ -199,10 +196,88 @@ input:focus, select:focus, textarea:focus {
   z-index: 0;
 }
 
+/* ---- Navbar ---- */
+.nav-link-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0;
+}
+.nav-link-btn:hover { color: var(--indigo); }
+
+@media (max-width: 720px) {
+  .navbar-links { display: none !important; }
+}
+
+/* ---- Dot-grid decorative background (behind hero) ---- */
+.dot-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(67, 56, 202, 0.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 40%, transparent 80%);
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 40%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- Dark footer ---- */
+.dark-footer {
+  background: var(--indigo-deep);
+  color: #e2e2f5;
+  padding: 48px 24px 0;
+  margin-top: 40px;
+}
+.dark-footer h4 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #a5a3d6;
+  margin: 0 0 16px;
+}
+.dark-footer a, .dark-footer button.footer-link {
+  color: #c7c6ea;
+  text-decoration: none;
+  font-size: 13.5px;
+  display: block;
+  margin-bottom: 12px;
+  transition: color 0.15s ease;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+.dark-footer a:hover, .dark-footer button.footer-link:hover { color: #fff; }
+.dark-footer .footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 32px;
+  padding: 18px 0;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: #9997c9;
+}
+.footer-social {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c7c6ea;
+}
+
 /* ---- TEMP COMPATIBILITY LAYER ----
-   Login/Staff/Admin pages haven't been redesigned to the Aurora system
-   yet (that's the next step) — these aliases keep them fully styled
-   and functional in the meantime, using the old class names they call. */
+   Any older components (Login/Staff/Admin pages) that still use the
+   original class names keep working. */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -210,25 +285,6 @@ input:focus, select:focus, textarea:focus {
   box-shadow: var(--shadow-sm);
   padding: 22px 24px;
 }
-.btn-primary, .btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 22px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  transition: transform 0.12s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-}
-.btn-primary:active, .btn-secondary:active { transform: scale(0.97); }
-.btn-primary:disabled, .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-secondary {
-  background: var(--surface);
-  color: var(--ink);
-  border: 1.5px solid var(--border);
-}
-.btn-secondary:hover:not(:disabled) { border-color: var(--indigo); color: var(--indigo); }
 .pill {
   display: inline-block;
   padding: 5px 12px;
