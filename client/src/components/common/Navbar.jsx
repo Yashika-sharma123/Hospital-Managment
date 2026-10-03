@@ -59,7 +59,7 @@ export default function Navbar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <LanguageToggle />
         <a href="/login" className="btn btn-primary" style={{ textDecoration: 'none', fontSize: 13, padding: '10px 18px' }}>
-          Staff Login
+           Login
         </a>
       </div>
     </nav>
