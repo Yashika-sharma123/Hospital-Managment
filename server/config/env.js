@@ -16,8 +16,9 @@ module.exports = {
   },
 
   otp: {
-    expiryMinutes: Number(process.env.OTP_EXPIRY_MINUTES) || 5,
-  },
+  expiryMinutes: Number(process.env.OTP_EXPIRY_MINUTES) || 5,
+  demoOtp: process.env.DEMO_OTP === 'true',
+},
 
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
 

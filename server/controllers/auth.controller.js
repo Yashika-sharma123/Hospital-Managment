@@ -42,9 +42,9 @@ const requestOtp = asyncHandler(async (req, res) => {
   // college project, the OTP is echoed back in the response so the demo
   // can be run end-to-end without needing a real phone/SMS service.
   // Remove this block entirely before any real deployment.
-  if (env.nodeEnv !== 'production') {
-    responseData.devOtp = code;
-  }
+  if (env.nodeEnv !== 'production' || env.otp.demoOtp) {
+  responseData.devOtp = code;
+}
 
   new ApiResponse(200, responseData, 'OTP sent').send(res);
 });
