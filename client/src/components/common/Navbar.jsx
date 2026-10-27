@@ -1,6 +1,7 @@
 import { Sparkles } from 'lucide-react';
 import LanguageToggle from './LanguageToggle';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 const scrollTo = (id) => {
   const el = document.getElementById(id);
@@ -10,6 +11,7 @@ const scrollTo = (id) => {
 
 export default function Navbar() {
   const { t } = useLanguage();
+  const { user, logout } = useAuth();
 
   return (
     <nav
@@ -58,9 +60,19 @@ export default function Navbar() {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <LanguageToggle />
-        <a href="/login" className="btn btn-primary" style={{ textDecoration: 'none', fontSize: 13, padding: '10px 18px' }}>
-           Login
-        </a>
+        {user ? (
+          <button
+            className="btn btn-primary"
+            onClick={logout}
+            style={{ fontSize: 13, padding: '10px 18px' }}
+          >
+            {t('logOut')}
+          </button>
+        ) : (
+          <a href="/login" className="btn btn-primary" style={{ textDecoration: 'none', fontSize: 13, padding: '10px 18px' }}>
+            Login
+          </a>
+        )}
       </div>
     </nav>
   );
